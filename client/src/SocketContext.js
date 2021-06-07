@@ -1,17 +1,19 @@
-import React, {createContext, useRef, useState, useEffect} from 'react'
+import React, {createContext, useRef, useState} from 'react'
 import {io} from 'socket.io-client'
 import Peer from 'simple-peer'
 
 const SocketContext = createContext()
 
 // const socket = io('http://localhost:5000');
-const socket = io('/');
 
 const ContextProvider = ({children}) => {
   const [stream, setStream] = useState()
+  const [socket, setSocket] = useState()
   const [me, setMe] = useState('')
+  const [loggedIn, setLoggedIn] = useState(false)
   const [name, setName] = useState('')
   const [call, setCall] = useState({})
+  const [usersList, setUsersList] = useState([])
   const [callAccepted, setCallAccepted] = useState(false)
   const [callEnded, setCallEnded] = useState(false)
 
@@ -19,20 +21,27 @@ const ContextProvider = ({children}) => {
   const userVideo = useRef()
   const connectionRef = useRef()
 
-  useEffect(() => {
+  const login = (name) => {
+    // const s = io('http://localhost:5000', {query: {name}});
+    const s = io('/', {query: {name}});
+    setSocket(s)
+    setLoggedIn(true)
     navigator.mediaDevices.getUserMedia({video: true, audio: true})
       .then((currentStream) => {
         setStream(currentStream)
         myVideo.current.srcObject = currentStream
       })
-    socket.on('me', (id) => {
+    s.on('me', (id) => {
       setMe(id)
     })
 
-    socket.on('call-user', ({from, name: callerName, signal}) => {
+    s.on('call-user', ({from, name: callerName, signal}) => {
       setCall({isReceivedCall: true, from, name: callerName, signal})
     })
-  }, [])
+    s.on('users-list', list => {
+      setUsersList(list.users.filter(user => user !== name))
+    })
+  }
 
   const answerCall = () => {
     setCallAccepted(true)
@@ -77,6 +86,9 @@ const ContextProvider = ({children}) => {
       setName,
       callEnded,
       me,
+      usersList,
+      loggedIn,
+      login,
       callUser,
       leaveCall,
       answerCall
