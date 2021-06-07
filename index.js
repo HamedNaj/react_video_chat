@@ -37,6 +37,11 @@ io.on("connection", (socket) => {
   })
   socket.on("disconnect", () => {
     USERS = USERS.filter(user => user.id !== socket.id)
+    socket.broadcast.emit('users-list', {
+      users: USERS.map(user => {
+        return user.name
+      })
+    })
     socket.broadcast.emit("callEnded")
   });
 
