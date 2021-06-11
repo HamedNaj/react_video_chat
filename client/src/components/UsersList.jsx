@@ -15,6 +15,9 @@ const useStyles = makeStyles((theme) => ({
     width: '100%',
     backgroundColor: theme.palette.background.paper,
     justifyContent: 'center',
+    [theme.breakpoints.down('xs')]: {
+      width: '100%',
+    },
   },
   span: {
     width: '100%',
@@ -56,8 +59,8 @@ export default function UsersList() {
             </ListItemIcon>
             <ListItemText id={user} primary={`${user}`}/>
             <ListItemSecondaryAction>
-              <IconButton edge="end" aria-label="comments">
-                <Phone onClick={() => callUser(user)}/>
+              <IconButton edge="end" aria-label="comments" onClick={() => callUser(user)}>
+                <Phone />
               </IconButton>
             </ListItemSecondaryAction>
           </ListItem>

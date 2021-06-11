@@ -1,7 +1,7 @@
 import React, {useContext} from 'react'
 import {Button, TextField, Grid, Typography, Container, Paper} from "@material-ui/core";
 import {makeStyles} from "@material-ui/core";
-import {ExitToApp, Phone, PhoneDisabled} from "@material-ui/icons";
+import {ExitToApp} from "@material-ui/icons";
 import {SocketContext} from "../SocketContext";
 import UsersList from '../components/UsersList'
 
@@ -21,11 +21,12 @@ const useStyles = makeStyles((theme) => ({
     margin: '35px 0',
     padding: 0,
     [theme.breakpoints.down('xs')]: {
-      width: '80%',
+      width: '90%',
     },
   },
   margin: {
     marginTop: 20,
+    type: 'submit'
   },
   padding: {
     padding: 20,
@@ -37,17 +38,23 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const Options = ({children}) => {
-  const { name, setName, login, usersList,loggedIn} = useContext(SocketContext)
+  const {name, setName, login, usersList, loggedIn} = useContext(SocketContext)
   const classes = useStyles()
+  const submitHandler = e => {
+    e.preventDefault()
+    login(name)
+  }
   return (
-    <Container style={{width:'50%'}}>
+    <Container className={classes.container}>
       <Paper elevation={10} className={classes.paper}>
-        <form className={classes.root} noValidate autoComplete='off'>
+        <form className={classes.root} noValidate autoComplete='off' onSubmit={submitHandler}>
           <Grid container className={classes.gridContainer}>
             <Grid item xs={12} md={12} className={classes.padding}>
-              <Typography  variant='h6'> Account Info</Typography>
-              <TextField label='Name' value={name} onChange={(e) => setName(e.target.value)} fullWidth/>
-              {!loggedIn && <Button variant='contained' color='primary' startIcon={<ExitToApp fontSize='large'/>} fullWidth
+              <Typography variant='h6'> Account Info</Typography>
+              <TextField label='Name' value={name} onChange={(e) => setName(e.target.value)}
+                         fullWidth/>
+              {!loggedIn &&
+              <Button variant='contained' color='primary' startIcon={<ExitToApp fontSize='large'/>} fullWidth
                       onClick={() => login(name)}
                       className={classes.margin}>
                 Login
