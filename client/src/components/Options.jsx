@@ -1,4 +1,4 @@
-import React, {useContext} from 'react'
+import React, {useContext, useEffect} from 'react'
 import {Button, TextField, Grid, Typography, Container, Paper} from "@material-ui/core";
 import {makeStyles} from "@material-ui/core";
 import {ExitToApp} from "@material-ui/icons";
@@ -44,15 +44,20 @@ const Options = ({children}) => {
     e.preventDefault()
     login(name)
   }
+  useEffect(() => {
+    const sessionName = sessionStorage.getItem('HPINGER_ZOOM_USERNAME')
+    if (sessionName)
+      login(sessionName)
+  }, [])
   return (
     <Container className={classes.container}>
       <Paper elevation={10} className={classes.paper}>
         <form className={classes.root} noValidate autoComplete='off' onSubmit={submitHandler}>
           <Grid container className={classes.gridContainer}>
             <Grid item xs={12} md={12} className={classes.padding}>
-              <Typography variant='h6'> Account Info</Typography>
-              <TextField label='Name' value={name} onChange={(e) => setName(e.target.value)}
-                         fullWidth/>
+              <Typography variant='h6'> Account Info : {name}</Typography>
+              {!loggedIn && <TextField label='Name' value={name} onChange={(e) => setName(e.target.value)}
+                         fullWidth/>}
               {!loggedIn &&
               <Button variant='contained' color='primary' startIcon={<ExitToApp fontSize='large'/>} fullWidth
                       onClick={() => login(name)}

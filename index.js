@@ -49,6 +49,10 @@ io.on("connection", (socket) => {
     const userId = USERS.find(user => user.name === userToCall)
     io.to(userId.id).emit("call-user", {signal: signalData, from, name});
   });
+  socket.on("call-ended", (username) => {
+    const userId = USERS.find(user => user.name === username)
+    io.to(userId.id).emit("call-ended");
+  });
 
   socket.on("answer-call", (data) => {
     io.to(data.to).emit("call-accepted", data.signal)

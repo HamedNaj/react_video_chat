@@ -14,6 +14,7 @@ const ContextProvider = ({children}) => {
   const [me, setMe] = useState('')
   const [loggedIn, setLoggedIn] = useState(false)
   const [name, setName] = useState('')
+  const [otherName, setOtherName] = useState('')
   const [call, setCall] = useState({})
   const [usersList, setUsersList] = useState([])
   const [callAccepted, setCallAccepted] = useState(false)
@@ -26,6 +27,8 @@ const ContextProvider = ({children}) => {
   const login = (name) => {
     const s = io('/', {query: {name}});
     setSocket(s)
+    sessionStorage.setItem('HPINGER_ZOOM_USERNAME', name)
+    setName(name)
     setLoggedIn(true)
     navigator.mediaDevices.getUserMedia({video: true, audio: true})
       .then((currentStream) => {
@@ -43,11 +46,14 @@ const ContextProvider = ({children}) => {
       setPlayingAudio(true)
     })
     s.on('users-list', list => {
-      setUsersList(list.users/*.filter(user => user !== name)*/)
+      setUsersList(list.users.filter(user => user !== name))
     })
-    s.on('call-reject' , ()=> {
+    s.on('call-reject', () => {
       setCall({})
       setPlayingAudio(false)
+    })
+    s.on('call-ended', () => {
+      window.location.reload()
     })
   }
 
@@ -57,6 +63,8 @@ const ContextProvider = ({children}) => {
     const peer = new Peer({initiator: false, trickle: false, stream})
     peer.on('signal', (data) => {
       socket.emit('answer-call', {signal: data, to: call.from})
+
+      setOtherName(call.name)
     })
     peer.on('stream', (currentStream) => {
       userVideo.current.srcObject = currentStream
@@ -69,6 +77,7 @@ const ContextProvider = ({children}) => {
     const peer = new Peer({initiator: true, trickle: false, stream})
     peer.on('signal', (data) => {
       socket.emit('call-user', {userToCall: id, signalData: data, from: me, name})
+      setOtherName(id)
     })
     peer.on('stream', (currentStream) => {
       userVideo.current.srcObject = currentStream
@@ -80,11 +89,8 @@ const ContextProvider = ({children}) => {
     connectionRef.current = peer
   }
   const leaveCall = () => {
-    setCallEnded(true)
-    setCallAccepted(false)
-    setCall({})
-    setPlayingAudio(false)
-    connectionRef.current.destroy()
+    socket.emit('call-ended', otherName)
+    window.location.reload()
   }
 
   return (
@@ -100,6 +106,7 @@ const ContextProvider = ({children}) => {
       me,
       usersList,
       loggedIn,
+      otherName,
       login,
       callUser,
       leaveCall,
