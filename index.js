@@ -35,6 +35,7 @@ io.on("connection", (socket) => {
       return user.name
     })
   })
+  socket.broadcast.emit('new-user')
   socket.on("disconnect", () => {
     USERS = USERS.filter(user => user.id !== socket.id)
     socket.broadcast.emit('users-list', {
@@ -51,7 +52,8 @@ io.on("connection", (socket) => {
   });
   socket.on("call-ended", (username) => {
     const userId = USERS.find(user => user.name === username)
-    io.to(userId.id).emit("call-ended");
+    if (userId)
+      io.to(userId.id).emit("call-ended");
   });
 
   socket.on("answer-call", (data) => {

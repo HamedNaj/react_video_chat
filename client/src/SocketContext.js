@@ -19,7 +19,7 @@ const ContextProvider = ({children}) => {
   const [usersList, setUsersList] = useState([])
   const [callAccepted, setCallAccepted] = useState(false)
   const [callEnded, setCallEnded] = useState(false)
-  const [setPlayingAudio] = useAudio('')
+  const [setPlayingAudio] = useAudio()
   const myVideo = useRef()
   const userVideo = useRef()
   const connectionRef = useRef()
@@ -43,7 +43,7 @@ const ContextProvider = ({children}) => {
 
     s.on('call-user', ({from, name: callerName, signal}) => {
       setCall({isReceivedCall: true, from, name: callerName, signal})
-      setPlayingAudio(true)
+      setPlayingAudio(true,'call')
     })
     s.on('users-list', list => {
       setUsersList(list.users.filter(user => user !== name))
@@ -54,6 +54,9 @@ const ContextProvider = ({children}) => {
     })
     s.on('call-ended', () => {
       window.location.reload()
+    })
+    s.on('new-user', () => {
+      setPlayingAudio(true, 'sms')
     })
   }
 
