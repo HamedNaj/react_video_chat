@@ -55,6 +55,11 @@ io.on("connection", (socket) => {
     if (userId)
       io.to(userId.id).emit("call-ended");
   });
+  socket.on("call-canceled", (username) => {
+    const userId = USERS.find(user => user.name === username)
+    if (userId)
+      io.to(userId.id).emit("call-canceled");
+  });
 
   socket.on("answer-call", (data) => {
     io.to(data.to).emit("call-accepted", data.signal)

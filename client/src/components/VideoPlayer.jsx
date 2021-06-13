@@ -25,7 +25,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const VideoPlayer = () => {
-  const {name, callAccepted, myVideo, userVideo, callEnded, stream, call,otherName} = useContext(SocketContext)
+  const {name, callAccepted, myVideo, userVideo, callEnded, stream, otherName} = useContext(SocketContext)
   const classes = useStyles()
   return (
     <Grid container className={classes.gridContainer}>

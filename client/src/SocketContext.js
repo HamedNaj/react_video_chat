@@ -16,6 +16,7 @@ const ContextProvider = ({children}) => {
   const [name, setName] = useState('')
   const [otherName, setOtherName] = useState('')
   const [call, setCall] = useState({})
+  const [calling, setCalling] = useState(false)
   const [usersList, setUsersList] = useState([])
   const [callAccepted, setCallAccepted] = useState(false)
   const [callEnded, setCallEnded] = useState(false)
@@ -23,6 +24,16 @@ const ContextProvider = ({children}) => {
   const myVideo = useRef()
   const userVideo = useRef()
   const connectionRef = useRef()
+
+  const logout = () => {
+    sessionStorage.removeItem('HPINGER_ZOOM_USERNAME')
+    cancelCall()
+    socket.disconnect()
+    setSocket(null)
+    setName('')
+    setLoggedIn(false)
+    setUsersList([])
+  }
 
   const login = (name) => {
     const s = io('/', {query: {name}});
@@ -43,7 +54,8 @@ const ContextProvider = ({children}) => {
 
     s.on('call-user', ({from, name: callerName, signal}) => {
       setCall({isReceivedCall: true, from, name: callerName, signal})
-      setPlayingAudio(true,'call')
+      setOtherName(callerName)
+      setPlayingAudio(true, 'call')
     })
     s.on('users-list', list => {
       setUsersList(list.users.filter(user => user !== name))
@@ -54,6 +66,12 @@ const ContextProvider = ({children}) => {
     })
     s.on('call-ended', () => {
       window.location.reload()
+    })
+    s.on('call-canceled', () => {
+      setCall({})
+      setCalling(false)
+      setPlayingAudio(false)
+      setOtherName('')
     })
     s.on('new-user', () => {
       setPlayingAudio(true, 'sms')
@@ -77,6 +95,7 @@ const ContextProvider = ({children}) => {
   }
   const callUser = (id) => {
     setCallEnded(false)
+    setCalling(true)
     const peer = new Peer({initiator: true, trickle: false, stream})
     peer.on('signal', (data) => {
       socket.emit('call-user', {userToCall: id, signalData: data, from: me, name})
@@ -95,6 +114,12 @@ const ContextProvider = ({children}) => {
     socket.emit('call-ended', otherName)
     window.location.reload()
   }
+  const cancelCall = () => {
+    setCalling(false)
+    setCall({})
+    setPlayingAudio(false)
+    socket.emit('call-canceled', otherName)
+  }
 
   return (
     <SocketContext.Provider value={{
@@ -110,10 +135,13 @@ const ContextProvider = ({children}) => {
       usersList,
       loggedIn,
       otherName,
+      calling,
       login,
       callUser,
       leaveCall,
-      answerCall
+      answerCall,
+      cancelCall,
+      logout
     }}>
       {children}
     </SocketContext.Provider>

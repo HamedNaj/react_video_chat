@@ -11,7 +11,6 @@ const useAudio = () => {
       setAudio(new Audio(ringtone))
     if (type === 'sms')
       setAudio(new Audio(notification))
-
     setPlaying(play)
   }
 

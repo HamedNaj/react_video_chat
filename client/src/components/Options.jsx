@@ -38,7 +38,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const Options = ({children}) => {
-  const {name, setName, login, usersList, loggedIn} = useContext(SocketContext)
+  const {name, setName, login, usersList, loggedIn,logout,callAccepted} = useContext(SocketContext)
   const classes = useStyles()
   const submitHandler = e => {
     e.preventDefault()
@@ -55,7 +55,7 @@ const Options = ({children}) => {
         <form className={classes.root} noValidate autoComplete='off' onSubmit={submitHandler}>
           <Grid container className={classes.gridContainer}>
             <Grid item xs={12} md={12} className={classes.padding}>
-              <Typography variant='h6'> Account Info : {name}</Typography>
+              {!callAccepted && <Typography variant='h6'> Account Info : {name}</Typography>}
               {!loggedIn && <TextField label='Name' value={name} onChange={(e) => setName(e.target.value)}
                          fullWidth/>}
               {!loggedIn &&
@@ -64,8 +64,14 @@ const Options = ({children}) => {
                       className={classes.margin}>
                 Login
               </Button>}
+              {loggedIn && !callAccepted &&
+              <Button variant='contained' color='secondary' startIcon={<ExitToApp fontSize='large'/>} fullWidth
+                      onClick={() => logout()}
+                      className={classes.margin}>
+                Logout
+              </Button>}
             </Grid>
-            <UsersList usersList={usersList}/>
+            { !callAccepted &&<UsersList usersList={usersList}/>}
           </Grid>
         </form>
         {children}
