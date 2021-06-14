@@ -55,7 +55,7 @@ const Options = ({children}) => {
         <form className={classes.root} noValidate autoComplete='off' onSubmit={submitHandler}>
           <Grid container className={classes.gridContainer}>
             <Grid item xs={12} md={12} className={classes.padding}>
-              {!callAccepted && <Typography variant='h6'> Account Info : {name}</Typography>}
+              {!callAccepted && loggedIn && <Typography variant='h6'> Account Info : {name}</Typography>}
               {!loggedIn && <TextField label='Name' value={name} onChange={(e) => setName(e.target.value)}
                          fullWidth/>}
               {!loggedIn &&
